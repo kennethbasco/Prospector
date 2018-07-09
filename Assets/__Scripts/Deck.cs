@@ -237,6 +237,16 @@ public class Deck : MonoBehaviour {
 				tGO.transform.localPosition = Vector3.zero;  // slap it smack dab in the middle
 				tGO.name = "face";
 			}
+
+			tGO = Instantiate(prefabSprite) as GameObject;
+			tSR = tGO.GetComponent<SpriteRenderer>();
+			tSR.sprite = cardBack;
+			tGO.transform.SetParent(card.transform);
+			tGO.transform.localPosition=Vector3.zero;
+			tSR.sortingOrder = 2;
+			tGO.name = "back";
+			card.back = tGO;
+			card.faceUp = false;
 			
 			cards.Add (card);
 		} // for all the Cardnames	
@@ -252,7 +262,7 @@ public class Deck : MonoBehaviour {
 		return (null);  // couldn't find the sprite (should never reach this line)
 	 }// getFace 
 
-	 static public Shuffle(ref List<Card> oCards)
+	 static public void Shuffle(ref List<Card> oCards)
 	 {
 	 	List<Card> tCards = new List<Card>();
 
