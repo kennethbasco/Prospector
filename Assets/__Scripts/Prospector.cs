@@ -1,16 +1,26 @@
-﻿using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+﻿
 using System.Collections;
+
 using System.Collections.Generic;
 
+using UnityEngine;
 
-public class Prospector : MonoBehaviour {
+using UnityEngine.SceneManagement;      // This will be used later in the project
 
-	static public Prospector 	S;
+using UnityEngine.UI;                   // This will be used later in the project
 
-	[Header("Set in Inspector")]
-	public TextAsset			deckXML;
+
+
+public class Prospector : MonoBehaviour
+{
+
+    static public Prospector S;
+
+
+
+    [Header("Set in Inspector")]
+
+    public TextAsset deckXML;
 
     public TextAsset layoutXML;
 
@@ -32,8 +42,10 @@ public class Prospector : MonoBehaviour {
 
     public Text gameOverText, roundResultText, highScoreText;
 
+
     [Header("Set Dynamically")]
-	public Deck					deck;
+
+    public Deck deck;
 
     public Layout layout;
 
@@ -49,10 +61,10 @@ public class Prospector : MonoBehaviour {
 
     public FloatingScore fsRun;
 
+    void Awake()
+    {
 
-
-    void Awake(){
-		S = this;
+        S = this; // Set up a Singleton for Prospector
 
         SetUpUITexts();
     }
@@ -120,23 +132,23 @@ public class Prospector : MonoBehaviour {
 
     }
 
-    void Start() {
 
+
+    void Start()
+    {
         Scoreboard.S.score = ScoreManager.SCORE;
 
-        deck = GetComponent<Deck> ();
-		deck.InitDeck (deckXML.text);
+        deck = GetComponent<Deck>(); // Get the Deck
 
-       
+        deck.InitDeck(deckXML.text); // Pass DeckXML to it
 
         Deck.Shuffle(ref deck.cards); // This shuffles the deck by reference // a
 
 
 
-        // Card c;
+        //Card c;
 
         //for (int cNum = 0; cNum < deck.cards.Count; cNum++)
-
         //{                    // b
 
         //  c = deck.cards[cNum];
@@ -144,6 +156,7 @@ public class Prospector : MonoBehaviour {
         //c.transform.localPosition = new Vector3((cNum % 13) * 3, cNum / 13 * 4, 0);
 
         //}
+
 
         layout = GetComponent<Layout>();  // Get the Layout component
 
@@ -176,6 +189,8 @@ public class Prospector : MonoBehaviour {
     }
 
 
+    // The Draw function will pull a single card from the drawPile and return it
+
     CardProspector Draw()
     {
 
@@ -186,6 +201,8 @@ public class Prospector : MonoBehaviour {
         return (cd);                      // And return it
 
     }
+
+
 
     // LayoutGame() positions the initial tableau of cards, a.k.a. the "mine"
 
@@ -246,13 +263,18 @@ public class Prospector : MonoBehaviour {
 
             cp.state = eCardState.tableau;
 
+            // CardProspectors in the tableau have the state CardState.tableau
+
             cp.SetSortingLayerName(tSD.layerName); // Set the sorting layers
+
 
 
 
 
             tableau.Add(cp); // Add this CardProspector to the List<> tableau    
         }
+
+        // Set which cards are hiding others
 
         foreach (CardProspector tCP in tableau)
         {
@@ -277,10 +299,7 @@ public class Prospector : MonoBehaviour {
         // Set up the Draw pile
 
         UpdateDrawPile();
-
     }
-
-
 
     // Convert from the layoutID int to the CardProspector with that ID
 
@@ -340,6 +359,7 @@ public class Prospector : MonoBehaviour {
         }
 
     }
+
 
 
 
@@ -473,6 +493,8 @@ public class Prospector : MonoBehaviour {
     }
 
 
+    // CardClicked is called any time a card in the game is clicked
+
     public void CardClicked(CardProspector cd)
     {
 
@@ -510,8 +532,8 @@ public class Prospector : MonoBehaviour {
 
 
             case eCardState.tableau:
-
                 // Clicking a card in the tableau will check if it's a valid play
+
                 bool validMatch = true;
 
                 if (!cd.faceUp)
@@ -542,13 +564,10 @@ public class Prospector : MonoBehaviour {
 
                 MoveToTarget(cd);  // Make it the target card
 
-
-
-
                 SetTableauFaces();  // Update tableau card face-ups
 
                 ScoreManager.EVENT(eScoreEvent.mine);
-
+                // Clicking a card in the tableau will check if it's a valid play
                 FloatingScoreHandler(eScoreEvent.mine);
 
                 break;
@@ -559,8 +578,9 @@ public class Prospector : MonoBehaviour {
 
         CheckForGameOver();
 
-
     }
+
+    // Test whether the game is over
 
     void CheckForGameOver()
     {
@@ -627,62 +647,55 @@ public class Prospector : MonoBehaviour {
     void GameOver(bool won)
     {
 
+        int score = ScoreManager.SCORE;
+
+        if (fsRun != null) score += fsRun.score;
+
         if (won)
         {
 
-            int score = ScoreManager.SCORE;
+            gameOverText.text = "Round Over";
 
-            if (fsRun != null) score += fsRun.score;
+            roundResultText.text = "You won this round!\nRound Score: " + score;
 
-            if (won)
-            {
+            ShowResultsUI(true);
 
-                gameOverText.text = "Round Over";
+            // print ("Game Over. You won! :)");  // Comment out this line
 
-                roundResultText.text = "You won this round!\nRound Score: " + score;
-
-                ShowResultsUI(true);
-
-                // print ("Game Over. You won! :)");  // Comment out this line
-
-                ScoreManager.EVENT(eScoreEvent.gameWin);
+            ScoreManager.EVENT(eScoreEvent.gameWin);
 
             FloatingScoreHandler(eScoreEvent.gameWin);
+
+
 
         }
         else
         {
 
-                // print ("Game Over. You Lost. :("); // Comment out this line
+            gameOverText.text = "Game Over";
 
+            if (ScoreManager.HIGH_SCORE <= score)
+            {
 
-                gameOverText.text = "Game Over";
+                string str = "You got the high score!\nHigh score: " + score;
 
-                if (ScoreManager.HIGH_SCORE <= score)
-                {
+                roundResultText.text = str;
 
-                    string str = "You got the high score!\nHigh score: " + score;
+            }
+            else
+            {
 
-                    roundResultText.text = str;
+                roundResultText.text = "Your final score was: " + score;
 
-                }
-                else
-                {
+            }
 
-                    roundResultText.text = "Your final score was: " + score;
+            ShowResultsUI(true);
 
-                }
+            // print ("Game Over. You Lost. :("); // Comment out this line
 
-                ShowResultsUI(true);
-
-                // print ("Game Over. You Lost. :("); // Comment out this line
-
-
-                ScoreManager.EVENT(eScoreEvent.gameLoss);
+            ScoreManager.EVENT(eScoreEvent.gameLoss);
 
             FloatingScoreHandler(eScoreEvent.gameLoss);
-
-
         }
 
         // Reload the scene, resetting the game
@@ -695,8 +708,7 @@ public class Prospector : MonoBehaviour {
 
         // This will give the score a moment to travel
 
-        Invoke("ReloadLevel", reloadDelay);                                // a
-
+        Invoke("ReloadLevel", reloadDelay);
 
     }
 
@@ -709,7 +721,7 @@ public class Prospector : MonoBehaviour {
 
     }
 
-
+    // Return true if the two cards are adjacent in rank (A & K wrap around)
 
     public bool AdjacentRank(CardProspector c0, CardProspector c1)
     {
@@ -742,6 +754,7 @@ public class Prospector : MonoBehaviour {
         return (false);
 
     }
+
 
     // Handle FloatingScore movement
 
@@ -838,7 +851,4 @@ public class Prospector : MonoBehaviour {
         }
 
     }
-
 }
-
-    }
