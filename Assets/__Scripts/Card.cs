@@ -141,12 +141,17 @@ public class Card : MonoBehaviour {
 	}
 
 
-	
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    virtual public void OnMouseUpAsButton()
+    {
+
+        print(name); // When clicked, this outputs the card name
+
+    }
+
+
+
+    // Update is called once per frame
+   
 } // class Card
 
 [System.Serializable]
